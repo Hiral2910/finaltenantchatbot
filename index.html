@@ -877,12 +877,14 @@
 
     ];
 
+// Load chat history from localStorage on page load
 window.addEventListener("DOMContentLoaded", () => {
-  const chatHistory = JSON.parse(sessionStorage.getItem("chatHistory")) || [];
+  const chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
   for (const { message, sender } of chatHistory) {
     displayMessage(message, sender, false);
   }
 });
+
 function sendMessage() {
   const inputField = document.getElementById("input");
   const userMessage = inputField.value.trim();
@@ -939,6 +941,7 @@ document.getElementById("input").addEventListener("keydown", function (event) {
     sendMessage();
   }
 });
+
 
   </script>
 </body>
