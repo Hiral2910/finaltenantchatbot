@@ -94,6 +94,7 @@
     <button onclick="clearChat()">Clear</button>
   </div>
 
+
   <script>
     const chatbotData = [
 
@@ -879,69 +880,52 @@
 
 
 
-  function sendMessage() {
-    const input = document.getElementById("input");
-    const text  = input.value.trim();
-    if (!text) return;
+   function sendMessage() {
+  const inputField = document.getElementById("input");
+  const userMessage = inputField.value.trim();
+  if (!userMessage) return;
 
-    // show & save user
-    displayMessage(text, "user");
-    appendToHistory(text, "user");
+  displayMessage(userMessage, "user");
 
-    // bot reply
-    const reply = getBotResponse(text);
-    displayMessage(reply, "bot");
-    appendToHistory(reply, "bot");
+  const botResponse = getBotResponse(userMessage);
+  displayMessage(botResponse, "bot");
 
-    input.value = "";
-  }
+  inputField.value = "";
+}
 
-  function displayMessage(message, sender, scroll = true) {
-    const chatbox = document.getElementById("chatbox");
-    const el = document.createElement("div");
-    el.className    = `message ${sender}`;
-    el.textContent = `${sender === "user" ? "You" : "Bot"}: ${message}`;
-    chatbox.appendChild(el);
-    if (scroll) chatbox.scrollTop = chatbox.scrollHeight;
-  }
+function displayMessage(message, sender) {
+  const chatbox = document.getElementById("chatbox");
+  const messageElem = document.createElement("div");
+  messageElem.className = `message ${sender}`;
+  messageElem.textContent = `${sender === "user" ? "You" : "Bot"}: ${message}`;
+  chatbox.appendChild(messageElem);
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
 
-  function getBotResponse(msg) {
-    const lower = msg.toLowerCase();
-    for (const { keywords, response } of chatbotData) {
-      if (keywords.some(k => lower.includes(k.toLowerCase()))) {
-        return response;
+function getBotResponse(message) {
+  const lowerMessage = message.toLowerCase();
+  for (const data of chatbotData) {
+    for (const keyword of data.keywords) {
+      if (lowerMessage.includes(keyword.toLowerCase())) {
+        return data.response;
       }
     }
-    return "I'm not sure how to respond to that. Can you rephrase?";
   }
+  return "I'm not sure how to respond to that. Can you rephrase ?";
+}
 
-  // Append one message + sender, and refresh timestamp
-  function appendToHistory(message, sender) {
-    let record = { timestamp: Date.now(), messages: [] };
-    try {
-      record = JSON.parse(localStorage.getItem(CHAT_KEY)) || record;
-    } catch { /* ignore parse errors */ }
+function clearChat() {
+  document.getElementById("chatbox").innerHTML = "";
+  document.getElementById("input").value = "";
+}
 
-    record.messages.push({ message, sender });
-    record.timestamp = record.timestamp || Date.now();
-    localStorage.setItem(CHAT_KEY, JSON.stringify(record));
+
+document.getElementById("input").addEventListener("keydown", function (event) {
+  if (event.key === "Enter") {
+    event.preventDefault(); 
+    sendMessage();
   }
-
-  // Clear both UI and storage
-  function clearChat() {
-    document.getElementById("chatbox").innerHTML = "";
-    document.getElementById("input").value    = "";
-    localStorage.removeItem(CHAT_KEY);
-  }
-
-  // send on Enter
-  document.getElementById("input").addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      sendMessage();
-    }
   });
-
 
   </script>
 </body>
