@@ -877,50 +877,71 @@
 
     ];
 
-    function sendMessage() {
-      const inputField = document.getElementById("input");
-      const userMessage = inputField.value.trim();
-      if (!userMessage) return;
+    // Load chat history from localStorage on page load
+window.addEventListener("DOMContentLoaded", () => {
+  const chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
+  for (const { message, sender } of chatHistory) {
+    displayMessage(message, sender, false);
+  }
+});
 
-      displayMessage(userMessage, "user");
+function sendMessage() {
+  const inputField = document.getElementById("input");
+  const userMessage = inputField.value.trim();
+  if (!userMessage) return;
 
-      const botResponse = getBotResponse(userMessage);
-      displayMessage(botResponse, "bot");
+  displayMessage(userMessage, "user");
+  saveMessage(userMessage, "user");
 
-      inputField.value = "";
-    }
+  const botResponse = getBotResponse(userMessage);
+  displayMessage(botResponse, "bot");
+  saveMessage(botResponse, "bot");
 
-    function displayMessage(message, sender) {
-      const chatbox = document.getElementById("chatbox");
-      const messageElem = document.createElement("div");
-      messageElem.className = `message ${sender}`;
-      messageElem.textContent = `${sender === "user" ? "You" : "Bot"}: ${message}`;
-      chatbox.appendChild(messageElem);
-      chatbox.scrollTop = chatbox.scrollHeight;
-    }
+  inputField.value = "";
+}
 
-    function getBotResponse(message) {
-      const lowerMessage = message.toLowerCase();
-      for (const data of chatbotData) {
-        for (const keyword of data.keywords) {
-          if (lowerMessage.includes(keyword.toLowerCase())) {
-            return data.response;
-          }
-        }
+function displayMessage(message, sender, scroll = true) {
+  const chatbox = document.getElementById("chatbox");
+  const messageElem = document.createElement("div");
+  messageElem.className = `message ${sender}`;
+  messageElem.textContent = `${sender === "user" ? "You" : "Bot"}: ${message}`;
+  chatbox.appendChild(messageElem);
+  if (scroll) chatbox.scrollTop = chatbox.scrollHeight;
+}
+
+function getBotResponse(message) {
+  const lowerMessage = message.toLowerCase();
+  for (const data of chatbotData) {
+    for (const keyword of data.keywords) {
+      if (lowerMessage.includes(keyword.toLowerCase())) {
+        return data.response;
       }
-      return "I'm not sure how to respond to that. Can you rephrase?";
     }
+  }
+  return "I'm not sure how to respond to that. Can you rephrase?";
+}
 
-    function clearChat() {
-      document.getElementById("chatbox").innerHTML = "";
-      document.getElementById("input").value = "";
-    }
-    document.getElementById("input").addEventListener("keydown", function (event) {
+// Save message to localStorage
+function saveMessage(message, sender) {
+  const chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
+  chatHistory.push({ message, sender });
+  localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
+}
+
+// Clear chat history from DOM and localStorage
+function clearChat() {
+  document.getElementById("chatbox").innerHTML = "";
+  document.getElementById("input").value = "";
+  localStorage.removeItem("chatHistory");
+}
+
+document.getElementById("input").addEventListener("keydown", function (event) {
   if (event.key === "Enter") {
-    event.preventDefault(); 
+    event.preventDefault();
     sendMessage();
   }
-  });
+});
+
   </script>
 </body>
 </html>
